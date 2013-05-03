@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Web", "MiniAmazon.Web\MiniAmazon.Web.csproj", "{100F938E-9BCC-4F64-8E40-2FC68F497863}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Data", "MiniAmazon.Data\MiniAmazon.Data.csproj", "{ED9182BF-61B9-4F2B-B400-39127FBFA236}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Domain", "MiniAmazon.Domain\MiniAmazon.Domain.csproj", "{81D9F7D3-FE9B-4E55-8876-102311DAD57A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.DatabaseDeployer", "MiniAmazon.DatabaseDeployer\MiniAmazon.DatabaseDeployer.csproj", "{98AD66B0-A3AD-48C6-91E5-1D6B74185AD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Web.Specs", "MiniAmazon.Web.Specs\MiniAmazon.Web.Specs.csproj", "{C1BEE134-8A55-4BA8-BDBC-F1AD7598C5F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Domain.Specs", "MiniAmazon.Domain.Specs\MiniAmazon.Domain.Specs.csproj", "{8413A468-EDD1-4E41-9D52-1FAFBE2845E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniAmazon.Data.Specs", "MiniAmazon.Data.Specs\MiniAmazon.Data.Specs.csproj", "{D4CD24D4-07BF-4060-A8C2-23B6F74B87F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{100F938E-9BCC-4F64-8E40-2FC68F497863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100F938E-9BCC-4F64-8E40-2FC68F497863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100F938E-9BCC-4F64-8E40-2FC68F497863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100F938E-9BCC-4F64-8E40-2FC68F497863}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED9182BF-61B9-4F2B-B400-39127FBFA236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED9182BF-61B9-4F2B-B400-39127FBFA236}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED9182BF-61B9-4F2B-B400-39127FBFA236}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED9182BF-61B9-4F2B-B400-39127FBFA236}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81D9F7D3-FE9B-4E55-8876-102311DAD57A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81D9F7D3-FE9B-4E55-8876-102311DAD57A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81D9F7D3-FE9B-4E55-8876-102311DAD57A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81D9F7D3-FE9B-4E55-8876-102311DAD57A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98AD66B0-A3AD-48C6-91E5-1D6B74185AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98AD66B0-A3AD-48C6-91E5-1D6B74185AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98AD66B0-A3AD-48C6-91E5-1D6B74185AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98AD66B0-A3AD-48C6-91E5-1D6B74185AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1BEE134-8A55-4BA8-BDBC-F1AD7598C5F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1BEE134-8A55-4BA8-BDBC-F1AD7598C5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1BEE134-8A55-4BA8-BDBC-F1AD7598C5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1BEE134-8A55-4BA8-BDBC-F1AD7598C5F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8413A468-EDD1-4E41-9D52-1FAFBE2845E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8413A468-EDD1-4E41-9D52-1FAFBE2845E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8413A468-EDD1-4E41-9D52-1FAFBE2845E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8413A468-EDD1-4E41-9D52-1FAFBE2845E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4CD24D4-07BF-4060-A8C2-23B6F74B87F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4CD24D4-07BF-4060-A8C2-23B6F74B87F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4CD24D4-07BF-4060-A8C2-23B6F74B87F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4CD24D4-07BF-4060-A8C2-23B6F74B87F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,95 @@
+@using BootstrapSupport
+@using MiniAmazon.Domain.Entities
+@model MiniAmazon.Web.Infrastructure.GeneralModel   
+<div class="row-fluid">
+    <div class="span2">
+        <div class="well">
+            <ul class="nav nav-list">
+                <li class="nav-header">Categories</li>
+                @foreach(var category in Model.Categories)
+                {
+                    if (!category.Active)
+                    {
+                        continue;
+                    }
+
+                    if (ViewBag.id == category.Id)
+                    {
+                        <li class="active"><a href="/Category/Products?id=@category.Id">@category.Name</a></li>
+
+                    }
+                    else
+                    {
+                        <li><a href="/Category/Products?id=@category.Id">@category.Name</a></li>
+                    }
+                }
+  
+            </ul>
+        </div>
+    </div>
+    <div class="span10">
+        <h4>@ViewBag.CategoryName <small>Listing</small></h4>
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+                <tr>
+                    @foreach (var property in Model._Object.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "CreateDateTime" || property.GetLabel() == "Active")
+                        {
+                            continue;
+                        }
+                        <th>
+                            @property.GetLabel().ToSeparatedWords()
+                        </th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            @{ int index = 0; }
+            @foreach (Sale model in Model._Object)
+            {
+                ViewData[index.ToString()] = model;
+                if(model.Active==false)
+                {
+                    continue;
+                    
+                }
+                <tr>
+                    
+                    @foreach (var property in model.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "CreateDateTime" || property.GetLabel() == "Active")
+                        {
+                            continue;
+                        }
+                        
+                        <td>
+                            @Html.Display(index + "." + property.Name)
+                        </td>                    
+                    }
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                                Action
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                @{
+                                    @Html.TryPartial("_actions", model)            
+                                    <li><a href="/Sale/Details?id=@(model.Id)">See Details</a></li>
+                                }
+                            </ul>
+                        </div>
+
+                    </td>
+                </tr>
+                index++;
+            }
+
+        </table>
+        
+    </div>
+</div>
+
+

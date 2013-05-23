@@ -1,5 +1,10 @@
 @using BootstrapSupport
-@model MiniAmazon.Web.Infrastructure.GeneralModel   
+@model MiniAmazon.Web.Infrastructure.CategoryGeneralModel   
+
+<br/>
+<br/>
+<br/>
+
 <div class="row-fluid">
     <div class="span2">
         <div class="well">
@@ -12,7 +17,7 @@
                         continue;
                     }
                        
-                    <li><a href="/Category/Products/@category.Id">@category.Name</a></li>
+                    <li><a href="/Category/Products/@category.Name">@category.Name</a></li>
                 }
   
             </ul>

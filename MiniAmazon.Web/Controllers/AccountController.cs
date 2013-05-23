@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Web.Mvc;
+using System.Web.Security;
 using AutoMapper;
+using Facebook;
 using MiniAmazon.Domain;
 using MiniAmazon.Domain.Entities;
 using MiniAmazon.Web.Infrastructure;
@@ -25,8 +25,120 @@ namespace MiniAmazon.Web.Controllers
             _mappingEngine = mappingEngine;
         }
 
-        public ActionResult SignIn()
+        private Uri RedirectUri
         {
+            get
+            {
+                var uriBuilder = new UriBuilder(Request.Url);
+                uriBuilder.Query = null;
+                uriBuilder.Fragment = null;
+                uriBuilder.Path = Url.Action("FacebookCallback");
+                return uriBuilder.Uri;
+            }
+        }
+
+        public ActionResult Facebook()
+        {
+            var fb = new FacebookClient();
+            var loginUrl = fb.GetLoginUrl(new
+            {
+                client_id = "166603383506329",
+                client_secret = "594078c31b94648e3e05e714fb578689",
+                redirect_uri = RedirectUri.AbsoluteUri,
+                response_type = "code",
+                scope = "email" // Add other permissions as needed
+            });
+
+            return Redirect(loginUrl.AbsoluteUri);
+        }
+
+        public ActionResult FacebookCallback(string code)
+        {
+            var fb = new FacebookClient();
+            dynamic result = fb.Post("oauth/access_token", new
+            {
+                client_id = "166603383506329",
+                client_secret = "594078c31b94648e3e05e714fb578689",
+                redirect_uri = RedirectUri.AbsoluteUri,
+                //code = code
+            });
+
+            var accessToken = result.access_token;
+
+            // Store the access token in the session
+            Session["AccessToken"] = accessToken;
+
+            // update the facebook client with the access token so 
+            // we can make requests on behalf of the user
+            fb.AccessToken = accessToken;
+
+            // Get the user's information
+            dynamic me = fb.Get("me?fields=first_name,last_name,age,genre,id,email,picture");
+            string email = me.email;
+            var account = _repository.First<Account>(u => u.Email == email);
+            if (account != null)
+            {
+                if (account.Active)
+                {
+                    //inicio Session y guardo los datos del proveedor (facebook)
+                    //Registrar Proveedor
+                    var roles = new List<string>();
+                    roles.Add(account.Role.Name);
+                    FormsAuthentication.SetAuthCookie(account.Email, true);
+                    SetAuthenticationCookie(account.Email, roles);
+                }
+                else
+                {
+                    Error("Your Account has been disabled, please contact with the web page administrator.");
+                }
+            }
+            else
+            {
+                //Registrar usuario,proveedor, e iniciar sesion 
+                //Registrar usuario con password automatica y activo
+                //Enviar correo al usuario con su nueva password
+
+                // Get the user's information
+                string firstName = me.first_name;
+
+                var user = new Account
+                {
+                    Name = firstName,
+                    Email = email,
+                    Password = "Prueba",
+                    Active = true,
+                    Followers = "",
+                    Age = me.age,
+                    Genre = me.genre,
+                    Role = _repository.First<Role>(r => r.Name == "User")
+                };
+                _repository.Create(user);
+
+                var roles = new List<string>();
+                roles.Add(user.Role.Name);
+                FormsAuthentication.SetAuthCookie(user.Email, true);
+                SetAuthenticationCookie(user.Email, roles); 
+                
+                Success(" ¡Enhorabuena! Te has registrado correctamente en lexStore");
+                Information("Se envio un link a tu correo para que puedas establecer una contraseña para tu cuenta.");
+                
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult LogOut()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("SignIn");
+        }
+
+        public ActionResult SignIn(string error = null)
+        {
+            if (!String.IsNullOrEmpty(error))
+            {
+                Error(error);
+            }
             return View(new AccountSignInModel());
         }
 
@@ -39,65 +151,44 @@ namespace MiniAmazon.Web.Controllers
 
             if (account!=null)
             {
-                
+                var roles = new List<string>();
+                roles.Add(account.Role.Name);
+                FormsAuthentication.SetAuthCookie(accountSignInModel.Email, accountSignInModel.RememberMe);
+                SetAuthenticationCookie(accountSignInModel.Email, roles);
+
                 return RedirectToAction("Index");
             }
-            Error("Wrong <strong>Email</strong> or <strong>Password</strong>. Please try again");
-            ViewBag.IncorrectPassword = 1;
+            Error("Wrong Email or Password. Please try again");
+            //[Authorize]ViewBag.IncorrectPassword = 1;
             return View(accountSignInModel);
         }
 
-
+        [Authorize]
         public ActionResult Index()
         {
-            IEnumerable<Account> model = _repository.Query<Account>(x => x == x );
-            return View(new GeneralModel(model, _repository));
-        }
-
-        public ActionResult Add()
-        {
-            IEnumerable<Account> jmz = _repository.Query<Account>(x => x == x);
-            return View(jmz);
-        }
-
-        public ActionResult Create()
-        {
-            return View(new AccountInputModel());
-        }
-
-        [HttpPost]
-        public ActionResult Create(AccountInputModel accountInputModel)
-        {
-            var account = Mapper.Map<AccountInputModel, Account>(accountInputModel);
+            var model = _repository.First<Account>(x => x.Email == User.Identity.Name);
             
-
-            _repository.Create(account);
-            
-            return RedirectToAction("Index","Sale");
+            return View(model);
         }
 
-        public ActionResult Delete(int id)
-        {
-            var model = _repository.First<Account>(x => x.Id == id);
-            model.Active = false;
-            _repository.Update(model);
-            Information("The Account " + model.Name + " was disabled. Remember you cannot delete elements.");
-
-            return RedirectToAction("index");
-        }
         public ActionResult Edit(int id)
         {
+            
             var cat = _repository.GetById<Account>(id);
-            var model = Mapper.Map<Account, AccountInputModel>(cat);
+            if(cat.Email.Equals(User.Identity.Name))
+            {
+                var model = Mapper.Map<Account, AccountInputModel>(cat);
 
-            return View("Create", model);
+                return View("Create", model);
+            }
+            Error("Error");
+            return View("Index");
         }
         [HttpPost]
         public ActionResult Edit(AccountInputModel model, int id)
         {
             if (ModelState.IsValid)
             {
-                
                 var account = _repository.GetById<Account>(model.Id);
                 var tempSale = account.Sales;
                 account = _mappingEngine.Map<AccountInputModel, Account>(model);
@@ -108,12 +199,6 @@ namespace MiniAmazon.Web.Controllers
                 return RedirectToAction("index");
             }
             return View("Create", model);
-        }
-
-        public ActionResult Details(int id)
-        {
-            var model = _repository.GetById<Account>(id);
-            return View(model);
         }
 
         public ActionResult ResetPassword()
@@ -128,17 +213,15 @@ namespace MiniAmazon.Web.Controllers
             var acc = _repository.First<Account>(x => x.Email.Equals(passwordRecoveryInputModel.Email));
             if(acc!=null)
             {
-                AesCryptoServiceProvider myAes = new AesCryptoServiceProvider();
-                Byte[] encodedBytes = EncryptStringToBytes_Aes(acc.Email, myAes.Key, myAes.IV);
-                
-
-                PasswordRecovery passwordRecovery = new PasswordRecovery();
-                passwordRecovery.Created = DateTime.Now;
-                passwordRecovery.HashKey = BitConverter.ToString(myAes.Key);
-                passwordRecovery.Iv = BitConverter.ToString(myAes.IV);
-                passwordRecovery.HashToken = BitConverter.ToString(encodedBytes);
-                passwordRecovery.Used = false;
+                var passwordRecovery = new PasswordRecovery
+                                           {
+                                               Created = DateTime.Now,
+                                               Used = false,
+                                               Account = acc,
+                                               Token = RandomGenerator.RandomString(10)
+                                           };
                 _repository.Create(passwordRecovery);
+                new MailController().ResetPasswordEmail(passwordRecovery).Deliver();
                 Success("A email has been sent to:" + passwordRecoveryInputModel.Email + " with instructions to reset the password");
             }
             else
@@ -149,125 +232,39 @@ namespace MiniAmazon.Web.Controllers
             return RedirectToAction("Index", "Sale");
         }
 
-        public ActionResult PasswordToken(string token = "CD-2E-C6-13-04-E0-CF-DE-51-C8-BB-D4-48-28-67-90")
+        public ActionResult PasswordToken(string id)
         {
-            PasswordRecovery rep = _repository.First<PasswordRecovery>(x => x.HashToken.Equals(token) && x.Used == false);
+            var rep = _repository.First<PasswordRecovery>(x => x.Token.Equals(id) && x.Used == false);
             if(rep!=null)
             {
-                AesCryptoServiceProvider myAes = new AesCryptoServiceProvider();
-                //Byte[] encodedBytes = ASCIIEncoding.Default.GetBytes(token);
-                //Byte[] hashKey = ASCIIEncoding.Default.GetBytes(rep.HashKey);
-                //Byte[] Iv = ASCIIEncoding.Default.GetBytes(rep.Iv);
-                //string decoded = DecryptStringFromBytes_Aes(encodedBytes, hashKey, Iv);
-                return View("Create", new PasswordResetInputModel("gadi@me.com"));
+                
+                return View("Create", new PasswordResetInputModel(rep.Account.Email));
             }
             Error("Wrong token or already used");
             return RedirectToAction("Index", "Sale");
         }
 
         [HttpPost]
-        public ActionResult PasswordToken(PasswordResetInputModel model, String token)
+        public ActionResult PasswordToken(PasswordResetInputModel model, String id)
         {
+            var rep = _repository.First<PasswordRecovery>(x => x.Token.Equals(id) && x.Used == false);
             if (model.Password.Equals(model.PasswordTwo))
             {
-                var account = _repository.First<Account>(x => x.Email.Equals(model.emailObtainer()));
+                var account = _repository.First<Account>(x => x.Email.Equals(rep.Account.Email));
                 account.Password = model.Password;
                 _repository.Update(account);
+                rep.Used = true;
+                _repository.Update(rep);
             }
             else
             {
                 Error("Passwords are not the same");
-                return View("Create", model: new PasswordResetInputModel(model.emailObtainer()));
+                return View("Create", new PasswordResetInputModel(model.emailObtainer()));
             }
-            Error("Wrong token or already used");
-            return RedirectToAction("Index", "Sale");
+            Information("Password succesfully changed!");
+            return RedirectToAction("SignIn","Account");
         }
 
-        
-
-        static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
-        {
-            // Check arguments. 
-            if (plainText == null || plainText.Length <= 0)
-                throw new ArgumentNullException("plainText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("Key");
-            byte[] encrypted;
-            // Create an AesCryptoServiceProvider object 
-            // with the specified key and IV. 
-            using (AesCryptoServiceProvider aesAlg = new AesCryptoServiceProvider())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for encryption. 
-                using (MemoryStream msEncrypt = new MemoryStream())
-                {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
-
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
-                    }
-                }
-            }
-
-
-            // Return the encrypted bytes from the memory stream. 
-            return encrypted;
-
-        }
-
-        static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
-        {
-            // Check arguments. 
-            if (cipherText == null || cipherText.Length <= 0)
-                throw new ArgumentNullException("cipherText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-
-            // Declare the string used to hold 
-            // the decrypted text. 
-            string plaintext = null;
-
-            // Create an AesCryptoServiceProvider object 
-            // with the specified key and IV. 
-            using (AesCryptoServiceProvider aesAlg = new AesCryptoServiceProvider())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for decryption. 
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
-                {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-
-                            // Read the decrypted bytes from the decrypting stream 
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
-            }
-            return plaintext;
-        }
 
         public ActionResult ValidatedEmail(string email)
         {

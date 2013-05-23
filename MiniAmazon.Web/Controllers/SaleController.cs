@@ -24,17 +24,10 @@ namespace MiniAmazon.Web.Controllers
 
         public ActionResult Index()
         {
-            IEnumerable<Sale> jmz = _repository.Query<Sale>(x => x == x); 
-            return View(new GeneralModel(jmz,_repository));
+            var account = _repository.First<Account>(x => x.Email == User.Identity.Name); 
+
+            return View(new CategoryGeneralModel(account.Sales,_repository));
         }
-
-        
-
-       // public ActionResult Add()
-       // {
-       //     IEnumerable<Account> jmz = _repository.Query<Account>(x => x == x);
-       //     return View(jmz);
-       // }
         
         public ActionResult Create()
         {
@@ -61,49 +54,21 @@ namespace MiniAmazon.Web.Controllers
         public ActionResult Delete(int id)
         {
             var model = _repository.First<Sale>(x => x.Id == id);
-            model.Active = false;
-            _repository.Update(model);
-            Information("The Sale " + model.Description + " was disabled. Remember you cannot delete elements.");
-
-            return RedirectToAction("index");
-        }
-        public ActionResult Edit(int id)
-        {
-            var sale = _repository.GetById<Sale>(id);
-            var model = Mapper.Map<Sale, SaleInputModel>(sale);
-            model.CategoryInitializer(_repository.Query<Category>(x => x == x));
-
-            return View("Create", model);
-        }
-        [HttpPost]
-        public ActionResult Edit(SaleInputModel model, int id)
-        {
-            if (ModelState.IsValid)
+            var account = _repository.First<Account>(x => x.Email == User.Identity.Name);
+            if(account.Sales.First(x => x == model)!=null)
             {
-                var sale = _repository.GetById<Sale>(model.Id);
+                model.Active = false;
+                _repository.Update(model);
+                Information("The Sale " + model.Description + " was disabled. Remember you cannot delete elements.");
 
-                //canchada
-                var dateTime = sale.CreateDateTime;
-                //fin chachada
-
-                sale = Mapper.Map<SaleInputModel, Sale>(model);
-
-                var category = _repository.First<Category>(x => x.Id == model.CategoryId);
-                sale.Category = category;
-
-                sale.CreateDateTime = dateTime;
-                
-                _repository.Update(sale);
-                var account = _repository.First<Account>(x => x.Id == model.AccountId);
-                
-                account.AddSale(sale);
-                _repository.Update(account);
-
-                Success("The model was updated!");
                 return RedirectToAction("index");
             }
-            return View("Create", model);
+            Error("The Sale " + model.Description + " was NOT disabled.");
+
+            return RedirectToAction("index");
+            
         }
+        
 
         public ActionResult Details(int id)
         {
@@ -172,7 +137,27 @@ namespace MiniAmazon.Web.Controllers
                 Success("The model was updated!");
                 return RedirectToAction("index");
             }
-            return View("Create", model);
+            return View("EditCreate", model);
         }
+
+        public ActionResult GoodOffer(int id)
+        {
+            var sale = _repository.First<Sale>(x =>  x.Id == id);
+            var account = _repository.First<Account>(x => x.Email == User.Identity.Name);
+            if(_repository.First<GoodOffer>(x => x.Sale==sale&&x.Account==account)==null)
+            {
+                var offer = new GoodOffer {Account = account, Sale = sale};
+                _repository.Create(offer);
+                Success("Marked as a good offer");
+            }
+            else
+            {
+                Error("Already marked as a good offer");
+            }
+            return View("Details", sale);
+
+        }
+
     }
 }
+

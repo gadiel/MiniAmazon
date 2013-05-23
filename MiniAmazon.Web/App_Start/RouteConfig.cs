@@ -13,6 +13,8 @@ namespace MiniAmazon.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.MapRoute("SignIn", "SignIn", new { controller = "Account", action = "SignIn" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

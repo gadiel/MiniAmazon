@@ -33,11 +33,13 @@ namespace MiniAmazon.DatabaseDeployer
             {
                 dd.Seed(new List<IDataSeeder>
                             {
+                                new RoleSeeder(session),
                                 new AccountSeeder(session),
                                 new CategorySeeder(session),
                                 new SaleSeeder(session),
                                 new SaleEditSeeder(session),
-                                new PasswordRecoverySeeder(session)
+                                new PasswordRecoverySeeder(session),
+                                new RoleSeeder(session)
                                 
                             });
                 tx.Commit();

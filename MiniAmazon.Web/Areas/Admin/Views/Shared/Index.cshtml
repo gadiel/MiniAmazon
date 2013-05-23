@@ -1,0 +1,91 @@
+@using BootstrapSupport
+@model MiniAmazon.Web.Infrastructure.CategoryGeneralModel   
+
+<br/>
+<br/>
+<br/>
+
+<div class="row-fluid">
+    <div class="span2">
+        <div class="well">
+            <ul class="nav nav-list">
+                <li class="nav-header">Categories</li>
+                @foreach(var category in Model.Categories)
+                {
+                    if(!category.Active)
+                    {
+                        continue;
+                    }
+                       
+                    <li><a href="/Category/Products/@category.Id">@category.Name</a></li>
+                }
+  
+            </ul>
+        </div>
+    </div>
+    <div class="span10">
+        <h4>@Model._Object.GetLabel() <small>Listing</small></h4>
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+                <tr>
+                    @foreach (var property in Model._Object.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "Sales")
+                        {
+                            continue;
+                        }
+                        <th>
+                            @property.GetLabel().ToSeparatedWords()
+                        </th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            @{ int index = 0; }
+            @foreach (var model in Model._Object)
+            {
+                ViewData[index.ToString()] = model;
+                <tr>
+                    @foreach (var property in model.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "Sales")
+                        {
+                            continue;
+                        }
+                        <td>
+                            @Html.Display(index + "." + property.Name)
+                        </td>                    
+                    }
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                                Action
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                @{
+                                    @Html.TryPartial("_actions", model)                            
+                                    var routevalues = model.GetIdValue();  
+                                    <li>@Html.ActionLink("Edit", "Edit", routevalues)</li>
+                                    <li>@Html.ActionLink("Details", "Details", routevalues)</li>
+                                    <li class="divider"></li>
+                                    <li>@Html.ActionLink("Delete", "Delete", routevalues)</li>
+                               
+                                }
+                            </ul>
+                        </div>
+
+                    </td>
+                </tr>
+                index++;
+            }
+
+        </table>
+        <p>
+            @Html.ActionLink("Create New", "Create", null, new {@class = "btn"})
+        </p>
+    </div>
+</div>
+
+

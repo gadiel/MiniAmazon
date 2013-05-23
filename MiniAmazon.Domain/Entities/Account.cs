@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MiniAmazon.Domain.Entities
 {
@@ -6,9 +7,13 @@ namespace MiniAmazon.Domain.Entities
     {
         private IList<Sale> _sales = new List<Sale>();
 
+        public virtual Role Role { get; set; }
+
         public virtual string Name { get; set; }
 
         public virtual string Email { get; set; }
+
+        public virtual string Followers { get; set; }
 
         public virtual string Password { get; set; }
 
@@ -16,7 +21,6 @@ namespace MiniAmazon.Domain.Entities
 
         public virtual string Genre { get; set; }
 
-        public virtual bool Admin { get; set; }
 
         public virtual bool Active { get; set; }
 
@@ -26,11 +30,14 @@ namespace MiniAmazon.Domain.Entities
             set { _sales = (IList<Sale>) value; }
         }
 
+        
         #region IEntity Members
 
         public virtual long Id { get; set; }
 
         #endregion
+
+        
 
         public virtual void AddSale(Sale sale)
         {
@@ -42,4 +49,5 @@ namespace MiniAmazon.Domain.Entities
 
         
     }
+
 }

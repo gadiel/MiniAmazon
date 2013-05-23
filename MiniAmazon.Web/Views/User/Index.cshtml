@@ -1,0 +1,76 @@
+@using BootstrapSupport
+@model MiniAmazon.Web.Infrastructure.UserGeneralModel
+<fieldset>
+    <legend>@Model.Account.GetLabel() <small>Details</small></legend>
+    <dl> <!-- use this class on the dl if you want horizontal styling http://twitter.github.com/bootstrap/base-css.html#typography  class="dl-horizontal"-->     
+        @foreach (var property in Model.Account.VisibleProperties())
+        {
+            <dt>
+                @property.GetLabel().ToSeparatedWords()
+            </dt>
+            <dd>
+                @Html.Display(property.Name)                
+            </dd>
+        }
+    </dl>
+</fieldset>
+<p>
+    <a href="/User/Follow/@Model.Account.Email">Follow Client</a>
+</p>
+<div class="span10">
+        <h4>@Model.Sales.GetLabel() <small>Sales from @Model.Account.Name</small></h4>
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+                <tr>
+                    @foreach (var property in Model.Sales.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "Sales")
+                        {
+                            continue;
+                        }
+                        <th>
+                            @property.GetLabel().ToSeparatedWords()
+                        </th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            @{ int index = 0; }
+            @foreach (var model in Model.Sales)
+            {
+                ViewData[index.ToString()] = model;
+                <tr>
+                    @foreach (var property in model.VisibleProperties())
+                    {
+                        if (property.GetLabel() == "Sales")
+                        {
+                            continue;
+                        }
+                        <td>
+                            @Html.Display(index + "." + property.Name)
+                        </td>                    
+                    }
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                                Action
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                @{
+                                    @Html.TryPartial("_actions", model)                            
+                                    var routevalues = model.GetIdValue();  
+                                    <li>@Html.ActionLink("Details", "Details", routevalues)</li>
+                               
+                                }
+                            </ul>
+                        </div>
+
+                    </td>
+                </tr>
+                index++;
+            }
+
+        </table>
+    </div>

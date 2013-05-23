@@ -4,9 +4,9 @@ using MiniAmazon.Domain.Entities;
 
 namespace MiniAmazon.Web.Infrastructure
 {
-    public class GeneralModel
+    public class CategoryGeneralModel
     {
-        public GeneralModel(IEnumerable<object> toDefine, IRepository _repository)
+        public CategoryGeneralModel(IEnumerable<object> toDefine, IRepository _repository)
         {
             Define(toDefine,_repository);
         }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Configuration;
 using System.Reflection;
+using System.Security.Principal;
+using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using System.Web.Security;
 using AcklenAvenue.Data.NHibernate;
 using AutoMapper;
 using AutoMapper.Mappers;
@@ -68,11 +71,13 @@ namespace MiniAmazon.Web
             base.OnApplicationStarted();
             AreaRegistration.RegisterAllAreas();
             WebApiConfig.Register(GlobalConfiguration.Configuration);
+            FluentSecurityConfig.Configure();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BootstrapBundleConfig.RegisterBundles(BundleTable.Bundles);
             ExampleLayoutsRouteConfig.RegisterRoutes(RouteTable.Routes);
             AutoMapperConfiguration.Configure();
+
         }
 
         protected override IKernel CreateKernel()
@@ -88,5 +93,29 @@ namespace MiniAmazon.Web
 
             return kernel;
         }
+
+        protected void Application_AuthenticateRequest(Object sender, EventArgs e)
+        {
+            if (Context.User != null)
+            {
+                string cookieName = FormsAuthentication.FormsCookieName;
+
+                HttpCookie authCookie = Context.Request.Cookies[cookieName];
+                if (authCookie == null)
+
+                    return;
+
+
+                FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+                string[] roles = authTicket.UserData.Split(new[] { '|' });
+
+
+                var fi = (FormsIdentity)(Context.User.Identity);
+
+                Context.User = new GenericPrincipal(fi, roles);
+            }
+        }
+
     }
 }

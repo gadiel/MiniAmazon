@@ -64,9 +64,11 @@
   <ItemGroup>
     <Compile Include="AccountSeeder.cs" />
     <Compile Include="CategorySeeder.cs" />
+    <Compile Include="GoodOfferSeeder.cs" />
     <Compile Include="PasswordRecoverySeeder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoleSeeder.cs" />
     <Compile Include="SaleEditSeeder.cs" />
     <Compile Include="SaleSeeder.cs" />
   </ItemGroup>

@@ -22,77 +22,9 @@ namespace MiniAmazon.Web.Controllers
             _mappingEngine = mappingEngine;
         }
 
-        public ActionResult Index()
+        public ActionResult Products(string id)
         {
-            IEnumerable<Category> jmz = _repository.Query<Category>(x => x == x); 
-            return View(new GeneralModel(jmz,_repository));
-        }
-
-       // public ActionResult Add()
-       // {
-       //     IEnumerable<Account> jmz = _repository.Query<Account>(x => x == x);
-       //     return View(jmz);
-       // }
-
-        public ActionResult Create()
-        {
-            return View(new CategoryInputModel());
-        }
-
-        [HttpPost]
-        public ActionResult Create(CategoryInputModel categoryInputModel)
-        {
-            var category = Mapper.Map<CategoryInputModel, Category>(categoryInputModel);
-
-            category.Created = System.DateTime.Now;
-            _repository.Create(category);
-            
-            return RedirectToAction("Index");
-        }
-
-        public ActionResult Delete(int id)
-        {
-            var model = _repository.First<Category>(x => x.Id == id);
-            model.Active = false;
-            _repository.Update(model);
-            Information("The Category "+model.Name+" was disabled. Remember you cannot delete elements.");
-            
-            return RedirectToAction("index");
-        }
-        public ActionResult Edit(int id)
-        {
-            var cat = _repository.GetById<Category>(id);
-            var model = Mapper.Map<Category, CategoryInputModel>(cat);
-
-            return View("Create", model);
-        }
-        [HttpPost]
-        public ActionResult Edit(CategoryInputModel model, int id)
-        {
-            if (ModelState.IsValid)
-            {
-                var category = _repository.GetById<Category>(id);
-                var tmpDate = category.Created;
-                category = Mapper.Map<CategoryInputModel, Category>(model);
-                category.Created = tmpDate;
-
-                _repository.Update(category);
-                
-                Success("The model was updated!");
-                return RedirectToAction("index");
-            }
-            return View("Create", model);
-        }
-
-        public ActionResult Details(int id)
-        {
-            var model = _repository.GetById<Category>(id);
-            return View(model);
-        }
-
-        public ActionResult Products(int id)
-        {
-            var model = _repository.Query<Sale>(x => x.Category.Id == id);
+            var model = _repository.Query<Sale>(x => x.Category.Name == id);
             
             ViewBag.id = id;
             if(!model.Equals(null))
@@ -100,11 +32,8 @@ namespace MiniAmazon.Web.Controllers
                 ViewBag.CategoryName = model.First().Category.Name;
             }
                 
-            
-            
-            return View(new GeneralModel(model, _repository));
+            return View(new CategoryGeneralModel(model, _repository));
         }
 
-        
     }
 }
